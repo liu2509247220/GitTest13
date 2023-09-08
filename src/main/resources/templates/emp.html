@@ -1,0 +1,265 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>springboot web开发</title>
+    <link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet"></link>
+    <link th:href="@{/css/bootstrap-datetimepicker.min.css}" type="text/css" rel="stylesheet"></link>
+    <script type="text/javascript" th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap-datetimepicker.zh-CN.js}"></script>
+
+    <script>
+        $(function () {
+            // 时间初始化
+            $('#add_hireDate').datetimepicker({
+                language: 'zh-CN',
+                weekStart: 1,
+                todayBtn: 1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                minView: 2,
+                forceParse: 0,
+                format: 'yyyy-mm-dd'
+            });
+
+        });
+
+        function add() {
+            // js 弹出模态框
+            $('#addModal').modal('show');
+        }
+
+        function upload() {
+            $('#uploadModal').modal('show');
+        }
+
+        function update(obj) {
+            var id = $(obj).parent().parent().find("td:eq(1)").text();
+            $.get(
+                '../emp/get/' + id,
+                function (emp) {
+                    console.log(emp.id);
+                    $("#update_id").val(emp.id);
+                    $("#update_ename").val(emp.ename);
+                    $("#update_job").val(emp.job);
+                    $("#update_dept_id").val(emp.dept.id);
+                    $("#upate_hireDate").val(emp.hireDate);
+                    $('#updateModal').modal('show');
+                },
+                'json'
+            );
+
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div>
+            <ol class="breadcrumb" style="background-color:transparent;font-size: 20px">
+                <li><a href="#">首页</a></li>
+                <li class="active">实战案例</li>
+                <li class="active">Spring Boot与Web开发</li>
+            </ol>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="clearfix panel-heading ">
+                <h1 style="text-align: center">ZTE员工信息表</h1>
+            </div>
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>员工编号</th>
+                    <th>姓名</th>
+                    <th>雇佣日期</th>
+                    <th>岗位</th>
+                    <th>部门</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+				 <tr th:each="emp,state : ${empList}">
+                    <td>[[${state.count}]]</td>
+                    <td>[[${emp.id}]]</td>
+                    <td>[[${emp.ename}]]</td>
+                    <td>[[${#dates.format(emp.hireDate,'yyyy-MM-dd')}]]</td>
+                    <td>[[${emp.job}]]</td>
+                    <td>[[${emp.dept.deptName}]]</td>
+                    <td style="text-align: center">
+                        <button class="btn btn-primary" id="btnAdd" onclick="add()"><span
+                                class="glyphicon  glyphicon-plus"></span>新增
+                        </button>
+                        <button class="btn btn-primary" id="btnUpload" onclick="upload()"><span
+                                class="glyphicon  glyphicon-plus"></span>上传图片
+                        </button>
+                        <button class="btn btn-primary" id="btnUpdate" onclick="update(this)"><span
+                                class="glyphicon glyphicon-pencil"></span>编辑
+                        </button>
+                        <button class="btn btn-primary" id="btnDelete" onclick="remove()"><span
+                                class="glyphicon glyphicon-minus"></span>删除
+                        </button>
+                        <button class="btn btn-primary" id="btnQuery" onclick="query()"><span
+                                class="glyphicon glyphicon-search"></span>查看
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--新增模态框-->
+<div class="modal fade" tabindex="-1" role="dialog" id="addModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">新增</h4>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/addEmp}" method="post">
+                    <div class="form-group">
+                        <label for="ename">员工姓名</label>
+                        <input type="text" name="ename" class="form-control" id="ename" placeholder="请输入员工姓名">
+                    </div>
+
+                    <div class="form-group">
+                        <label>部门</label>
+                        <select class="form-control" name="dept.id">
+                            <!-- 从数据库表中获取真实数据展示  -->
+                            <option value="10">研发部</option>
+                            <option value="20">测试部</option>
+                            <option value="30">人事部</option>
+                            <option value="40">后勤部</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>岗位</label>
+                        <select class="form-control" name="job">
+                            <!--  也是要根据数据库里面的数据展示   -->
+                            <option value="研发">研发</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hiredate">入职时间</label>
+                        <input type="text" readonly class="form-control" name="hireDate" id="add_hireDate"
+                               placeholder="请选择入职时间">
+                    </div>
+
+                    <div class="form-group" style="text-align: center;">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--新增模态框-->
+
+<!--修改模态框-->
+<div class="modal fade" tabindex="-1" role="dialog" id="updateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">修改</h4>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/emp/update}" method="post">
+                    <input type="text" name="id" class="form-control" id="update_id" hidden>
+                    <div class="form-group">
+                        <label for="ename">员工姓名</label>
+                        <input type="text" name="ename" class="form-control" id="update_ename" placeholder="请输入员工姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>部门</label>
+                        <select class="form-control" name="dept.id" id="update_dept_id">
+                            <option value="10">研发部</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>岗位</label>
+                        <select class="form-control" name="job" id="update_job">
+                            <option value="研发">研发</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hiredate">入职时间</label>
+                        <input type="text" readonly class="form-control" name="hireDate" id="upate_hireDate"
+                               placeholder="请选择入职时间">
+                    </div>
+
+                    <div class="form-group" style="text-align: center;">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--修改模态框-->
+
+<!--上传图片模态框-->
+<div class="modal fade" tabindex="-1" role="dialog" id="uploadModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">上传图片</h4>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/emp/upload}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="ename">员工姓名</label>
+                        <input type="text" name="ename" class="form-control" placeholder="请输入员工姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>部门</label>
+                        <select class="form-control" name="dept.id">
+                            <option value="10">研发部</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>岗位</label>
+                        <select class="form-control" name="job">
+                            <option value="研发">研发</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hiredate">入职时间</label>
+                        <input type="text" readonly class="form-control" name="hireDate" id="hireDate"
+                               placeholder="请选择入职时间">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">员工照片</label>
+                        <input type="file" id="phone" name="photo">
+                    </div>
+                    <div class="form-group" style="text-align: center;">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--上传图片模态框-->
+</body>
+</html>

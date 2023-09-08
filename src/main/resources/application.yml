@@ -1,0 +1,67 @@
+server:
+  port: 8081    # 配置服务器端口号
+  servlet:
+    context-path: /       # 配置项目应用名
+
+
+spring:
+  datasource:
+   driver-class-name: com.mysql.cj.jdbc.Driver
+   url: jdbc:mysql://localhost:3306/springboot?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8
+   username: root
+   password: 12345
+   type: com.alibaba.druid.pool.DruidDataSource  # 指定数据库连接池的类型
+
+   #下面这些属于durid连接池的相关配置  ， 可配可不配，不配的话使用默认值
+   initialSize: 5  #启动时初始化5个连接
+   minIdle: 5    #最小空闲连接5个
+   maxActive: 20   #最大连接数量20
+   maxWait: 60000   #获取连接等待时间（毫秒）:60秒，超出报错
+   timeBetweenEvictionRunsMillis: 60000  #每60秒执行一次连接回收器
+   minEvictableIdleTimeMillis: 300000   #5分钟内没有任何操作的空闲连接会被回收
+   validationQuery: SELECT 1     #验证连接有效性的SQL
+   testWhileIdle: true   #空闲时校验，建议开启
+   testOnBorrow: false  #使用中是否校验有效性，推荐关闭
+   testOnReturn: false   #归还连接时校验有效性，推荐关闭
+   poolPreparedStatements: false   #mysql中为false, oracle中设置为true
+   filters: stat,wall,logback   #设置过滤器，stat用于接收状态，wall用于防止SQL注入,logback则说明使用logback日志输出
+   maxPoolPreparedStatementPerConnectionSize: 20
+   useGlobalDataSourceStat: true   #统计所有数据源状态
+   connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500  #sql合并统计，与设置慢SQL时间为500毫秒
+
+   # 配置时间
+   mvc:
+     date-format: yyyy-MM-dd
+
+   jackson:
+     date-format: yyyy-MM-dd
+     time-zone: GMT+8
+     indent_output: true
+
+
+  # 配置mybatis
+mybatis:
+  config-location: classpath:mybatis-config.xml     # 指定mybatis的核心配置文件
+  mapper-locations: classpath:mapper/*Mapper.xml   # 指定写sql语句的XXXMapper.xml
+  type-aliases-package: com.ncit.springboot_test.entity  # 给实体Bean取别名
+
+
+ # 配置打印 sql语句的日志
+logging:
+  level:
+    com:
+      ncit:
+        springboot_test:
+          dao: debug
+
+
+
+# thymeleaf模板引擎的相关配置
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    cache: false
+    suffix: .html
+    encoding: UTF-8
+    content-type: text/html
+    mode: HTML5
